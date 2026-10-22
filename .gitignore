@@ -3,6 +3,18 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Database
+*.db
+*.sqlite
+
+# Generated
+app/static/audio/tts/
+recordings/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
 # C extensions
 *.so
 
