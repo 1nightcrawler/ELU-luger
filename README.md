@@ -7,6 +7,12 @@ ja vastab loetu mõistmise küsimustele; õpetaja saab jälgida tema edenemist.
 Tallinna Ülikooli ELU projekt.
 **Staatus:** varajane prototüüp, arenduses.
 
+## Tekstid
+
+Sisendina aksepteeritakse .json, .txt, .epub ja .docx faile.
+**PDF-id ei ole toetatud**, vähemalt alustuseks. 
+Idee oleks, et on conversion script, mis muudab teksti .json failiks, et oleks lihtsam teostada teksti kohta küsimuste jms loomist.
+
 ## Tehnoloogiad
 
 Python + Flask (backend), HTML/CSS/JS (frontend), SQLite (andmebaas).
