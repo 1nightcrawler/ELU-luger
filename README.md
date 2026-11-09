@@ -7,31 +7,27 @@ ja vastab loetu mõistmise küsimustele; õpetaja saab jälgida tema edenemist.
 Tallinna Ülikooli ELU projekt.
 **Staatus:** varajane prototüüp, arenduses.
 
-## Tekstid
+## Tekstide import
 
-Sisendina aksepteeritakse .json, .txt, .epub ja .docx faile.
-**PDF-id ei ole toetatud**, vähemalt alustuseks. 
-Idee oleks, et on conversion script, mis muudab teksti .json failiks, et oleks lihtsam teostada teksti kohta küsimuste jms loomist.
+Planeeritud sisendvormingud on `.json`, `.txt`, `.epub` ja `.docx`; importimise ja teisendamise töövoog ei ole praeguses prototüübis veel valmis. PDF-tugi ei ole esialgu plaanis. Eesmärk on teisendada tekst ühtsesse JSON-kujusse, et seda oleks lihtsam küsimuste ja lugemisfunktsioonidega kasutada.
 
 ## Tehnoloogiad
 
 Python + Flask (backend), HTML/CSS/JS (frontend), SQLite (andmebaas).
 Sihtriistvara: Raspberry Pi 400 koos puuteekraaniga.
 
-## Käivitamine
+## Dokumentatsioon
 
-```bash
-git clone <repo-url>
-cd ELU-luger
-python3 -m venv venv
-source venv/bin/activate      # Windowsis: venv\Scripts\activate
-pip install -r requirements.txt
-flask --app app/app.py run
-```
+Dokumentatsioon on hetkel kirjutatud inglise keeles.
 
-Seejärel ava brauseris [http://localhost:5000]
+- [Töökeskkonna seadistamine ja käivitamine](docs/getting-started.md)
+- [Andmebaasi mudel](docs/database.md)
+
+Käivitamise, migreerimise ja arenduse töövoo juhised asuvad getting-started juhendis.
 
 ## Projekti struktuur
 
-- `app/` – Flaski rakendus (marsruudid, andmebaas, esirakendus)
-- `content/texts/` – lugemistekstid või raamatud
+- `app/` – Flaski rakendus, mudelid ja mallid
+- `migrations/` – andmebaasi migratsioonid
+- `docs/` – arendus- ja andmebaasidokumentatsioon
+- `content/texts/` – planeeritud asukoht lugemistekstidele; pole veel prototüübis loodud
