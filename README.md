@@ -1,33 +1,43 @@
 # Lugemisseade
 
-Funktsionaalse lugemisoskuse arengut toetava seadme prototüüp hariduslike
-erivajadustega õpilastele. Õpilane loeb oma tasemele vastavaid tekste
-ja vastab loetu mõistmise küsimustele; õpetaja saab jälgida tema edenemist.
+A prototype device that supports the development of functional reading
+skills for students with special educational needs. Students read texts
+matched to their level and answer reading comprehension questions;
+teachers can follow their progress.
 
-Tallinna Ülikooli ELU projekt.
-**Staatus:** varajane prototüüp, arenduses.
+A Tallinn University ELU project.
+**Status:** early prototype, in development.
 
-## Tekstide import
+## Text import
 
-Planeeritud sisendvormingud on `.json`, `.txt`, `.epub` ja `.docx`; importimise ja teisendamise töövoog ei ole praeguses prototüübis veel valmis. PDF-tugi ei ole esialgu plaanis. Eesmärk on teisendada tekst ühtsesse JSON-kujusse, et seda oleks lihtsam küsimuste ja lugemisfunktsioonidega kasutada.
+The planned input formats are `.json`, `.txt`, `.epub` and `.docx`; the import and conversion workflow is not yet complete in the current prototype. PDF support is not planned for now. The goal is to convert texts into a single JSON format, so they are easier to use with questions and reading features.
 
-## Tehnoloogiad
+## Technologies
 
-Python + Flask (backend), HTML/CSS/JS (frontend), SQLite (andmebaas).
-Sihtriistvara: Raspberry Pi 400 koos puuteekraaniga.
+Python + Flask (backend), HTML/CSS/JS (frontend), SQLite (database).
+Target hardware: Raspberry Pi 400 with a touchscreen.
 
-## Dokumentatsioon
+## Documentation
 
-Dokumentatsioon on hetkel kirjutatud inglise keeles.
+- [Setting up and running the development environment](docs/getting-started.md)
+- [Database model](docs/database.md)
 
-- [Töökeskkonna seadistamine ja käivitamine](docs/getting-started.md)
-- [Andmebaasi mudel](docs/database.md)
+Instructions for running the app, migrations and the development workflow are in the getting-started guide.
 
-Käivitamise, migreerimise ja arenduse töövoo juhised asuvad getting-started juhendis.
+## Project structure
 
-## Projekti struktuur
+- `app/` – Flask application, models and templates
+- `migrations/` – database migrations
+- `docs/` – development and database documentation
+- `content/texts/` – planned location for reading texts; not yet created in the prototype
 
-- `app/` – Flaski rakendus, mudelid ja mallid
-- `migrations/` – andmebaasi migratsioonid
-- `docs/` – arendus- ja andmebaasidokumentatsioon
-- `content/texts/` – planeeritud asukoht lugemistekstidele; pole veel prototüübis loodud
+## Development workflow
+
+- `main` must always work: the app starts and migrations apply.
+- Every change is made on its own short-lived branch and merged into `main` through a pull request (PR).
+- Branch names follow the commit prefixes: `feat/…`, `fix/…`, `docs/…`, `chore/…`, `refactor/…` (e.g. `feat/txt-import`).
+- Documentation for a feature goes on the same branch as its code. Small documentation fixes (e.g. typos) may go directly to `main`; code changes never do.
+- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): imperative mood, subject line of at most 50 characters, e.g. `feat: add TXT import script`.
+- Only one branch at a time changes the database schema (`app/models.py`). Tell the group, and merge the branch before anyone else changes the schema. Otherwise Alembic ends up with two heads and `db upgrade` fails.
+- Before merging, check that the app starts and that `db upgrade` works on an empty database.
+- Never commit database files, virtual environments or student voice recordings (see `.gitignore`).
