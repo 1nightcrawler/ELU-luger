@@ -33,6 +33,8 @@ Instructions for running the app, migrations and the development workflow are in
 
 ## Development workflow
 
+These are not a hard requirement, but just good practice to keep things clean.
+
 - `main` must always work: the app starts and migrations apply.
 - Every change is made on its own short-lived branch and merged into `main` through a pull request (PR).
 - Branch names follow the commit prefixes: `feat/…`, `fix/…`, `docs/…`, `chore/…`, `refactor/…` (e.g. `feat/txt-import`).
