@@ -1,6 +1,6 @@
 # Getting started
 
-This guide sets up the Flask prototype for local development. Commands assume the repository root is the current directory unless noted. The checked-in migration repository is at the root, and the Flask CLI is invoked with `app/app.py`.
+This guide sets up the Flask prototype for local development. Commands assume the repository root is the current directory unless noted. The checked-in migration repository is at the root. The root `.flaskenv` file configures Flask to load `run.py` and use the development configuration.
 
 ## Prerequisites
 
@@ -54,36 +54,46 @@ The `myenv/` environment used by one developer is local to that machine. Create 
 The repository already contains a Flask-Migrate repository in `migrations/` and an initial schema revision. For a fresh clone, apply the committed migrations:
 
 ```shell
-python -m flask --app app/app.py db upgrade
-python -m flask --app app/app.py db current
+flask db upgrade
+flask db current
 ```
 
-Run these from the repository root. Do **not** run `db init` for the normal setup: that command creates a new migration repository, and this project already has one. The configured SQLite URL is `sqlite:///database.db`; Flask-SQLAlchemy resolves this relative to the Flask instance directory, so the local file is normally `app/instance/database.db`.
+Run these from the repository root with the virtual environment active. Flask reads `FLASK_APP=run.py` from `.flaskenv`. Do **not** run `db init` for the normal setup: that command creates a new migration repository, and this project already has one. The development configuration uses `DEV_DATABASE_URL` when it is set; otherwise it uses the SQLite file `data-dev.sqlite` at the repository root. The test configuration similarly accepts `TEST_DATABASE_URL` and otherwise uses `data-test.sqlite` at the repository root.
 
-The database file is local state and is ignored by Git. Keep important local data backed up separately; migrations reproduce the schema, not the contents of a developer's database. There is currently no seed-data command, so a fresh database starts without books, users, classrooms, or tests.
+The database file is local state and is ignored by Git. Keep important local data backed up separately; migrations reproduce the schema, not the contents of a developer's database. There is currently no seed-data command, so a fresh database starts without book records, user accounts, classrooms, or assessment records.
 
 For more detail about tables, relationships, and current limitations, see [Database model](database.md).
 
 ## Run the web application
 
-From the repository root, with the virtual environment active:
+From the repository root, with the virtual environment active, start the development server:
 
 ```shell
-python -m flask --app app/app.py run --debug
+flask run
 ```
 
-Open <http://127.0.0.1:5000/>. The current application is an early prototype; the active route renders the landing page. Most of the database model describes planned functionality that does not yet have complete application routes or workflows.
+The installed `python-dotenv` package lets Flask CLI load `.flaskenv` automatically. That file points Flask to `run.py`, enables debug mode, and selects the development configuration, so you do not need to pass `--app` or `--debug` manually. Open <http://127.0.0.1:5000/> in your browser. The current application is an early prototype; the active route renders the landing page, while much of the database model describes functionality that does not yet have complete application routes or workflows.
 
 Stop the development server with `Ctrl+C`.
+
+## Run the tests
+
+With the virtual environment active and the repository root as the current directory, run the test suite through the Flask CLI:
+
+```shell
+flask test
+```
+
+This project uses Python's built-in `unittest` framework; the `test` command discovers and runs tests in `tests/`. The tests use the testing configuration (`TESTING=True`) and create/drop their tables during each test. By default, this configuration uses `data-test.sqlite` at the repository root; set `TEST_DATABASE_URL` to use a different test database. Do not point it at a development or production database.
 
 ## Change the database schema
 
 When a model change alters the schema, generate a migration, inspect it, then apply it:
 
 ```shell
-python -m flask --app app/app.py db migrate -m "describe the schema change"
+flask db migrate -m "describe the schema change"
 # Review the new file under migrations/versions/ before applying it.
-python -m flask --app app/app.py db upgrade
+flask db upgrade
 ```
 
 Commit both the model change and the generated migration. Autogeneration is a draft: check that it includes the intended columns, constraints, indexes, and foreign keys. Do not edit the database manually or use `db.create_all()` as a replacement for migrations.
@@ -91,7 +101,7 @@ Commit both the model change and the generated migration. Autogeneration is a dr
 Only run this once if creating a brand-new migration repository (not needed for the normal clone workflow):
 
 ```shell
-python -m flask --app app/app.py db init
+flask db init
 ```
 
 If a migration or upgrade fails, stop and inspect the error and generated revision before trying another migration. Do not delete the local SQLite database as a generic fix; that destroys its data.
@@ -99,24 +109,27 @@ If a migration or upgrade fails, stop and inspect the error and generated revisi
 ## Project layout
 
 ```text
+run.py               Flask CLI entry point and test command
+config.py            development, testing, and production settings
+.flaskenv             local Flask CLI configuration
 app/
-  app.py             Flask application, configuration, and routes
-  extensions.py      shared Flask-SQLAlchemy extension
-  models.py          SQLAlchemy models and enums
-  templates/         Jinja templates
+  __init__.py         application factory and SQLAlchemy extension
+  models.py           SQLAlchemy models and enums
+  api/                API blueprint
+  main/               main web blueprint and views
+  templates/          Jinja templates
 migrations/
-  versions/          committed Alembic/Flask-Migrate revisions
+  versions/           committed Alembic/Flask-Migrate revisions
+tests/
+  test_basics.py      unittest tests for app setup
 docs/
-  getting-started.md this guide
-  database.md        data model reference
-requirements.txt     direct Python dependencies
+  getting-started.md  this guide
+  database.md         data model reference
+requirements.txt      Python dependencies
 ```
 
 ## Troubleshooting
 
-- **`ModuleNotFoundError: extensions` or `models`:** run the Flask commands from the repository root with `--app app/app.py` as shown above.
-- **`No such command 'db'`:** install the requirements into the active environment, then use `python -m flask` so the command uses that environment's Flask installation.
-- **Import or migration errors:** verify that all models import successfully before generating migrations. Review the full traceback; do not apply a partial or hand-edited schema as a workaround.
-- **Database and model differ:** run `python -m flask --app app/app.py db current` and inspect the revisions under `migrations/versions/`. Create and review a migration for model changes, then run `db upgrade`.
-
-There is no test or lint command configured in this repository yet. Add a test suite and document its command when one is introduced.
+- **Flask cannot find the app or a CLI command:** make sure the virtual environment is active, dependencies are installed, and the current directory is the repository root so Flask can load `.flaskenv`.
+- **Import or migration errors:** review the full traceback and verify that models import successfully before generating migrations. Do not apply a partial or hand-edited schema as a workaround.
+- **Database and model differ:** run `flask db current` and inspect the revisions under `migrations/versions/`. Create and review a migration for model changes, then run `flask db upgrade`.

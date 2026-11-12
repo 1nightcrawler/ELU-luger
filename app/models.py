@@ -1,5 +1,5 @@
-from extensions import db
 from enum import Enum
+from . import db
 
 #TODO: implement tables to hold free answer, drag&drop, speaking (future)
 
