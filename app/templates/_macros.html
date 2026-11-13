@@ -1,0 +1,12 @@
+{% macro footer_navigation_bar(role="USER", selected) %}
+{% if role != "TEACHER" | role != "ADMIN" %}
+<div>
+    <a href="/">Raamatud</a>
+    <a href="/statistics">Statistika</a>
+    {% if role == "USER" %}
+        <a href="/leaderboard">Edetabel</a>
+    {% endif %}
+    <a href="/settings">Seaded</a>
+</div>
+{% endif %}
+{% endmacro %}

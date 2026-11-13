@@ -1,0 +1,35 @@
+{% block content %}
+<div id="book-content-wrapper">
+    <div id="book-content">
+        
+    </div>
+</div>
+{% endblock %}
+{% block }
+
+{% block scripts %}
+<script>
+    const bookText = document.querySelector("#book-content");
+    const status = document.querySelector("#status");
+    const errorMessage = document.querySelector("#error-message");
+    const contentUrl = {{ url_for("api.get_book_content", book_id=book_id)|tojson }};
+
+    fetch(contentUrl)
+        .then(response => {
+            if (!response.ok) {
+            throw new Error(`Request failed: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            bookText.textContent = data.content;
+            bookText.setAttribute("aria-busy", "false");
+            status.hidden = true;
+        })
+        .catch(error => {
+            console.error(error);
+            status.hidden = true;
+            errorMessage.hidden = false;
+        });
+</script>
+{% endblock %}

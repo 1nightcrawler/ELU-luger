@@ -20,3 +20,16 @@ def test():
         import sys
         sys.exit(1)
 
+@app.cli.command("seed")
+def seed():
+    from app.seed import seed_example_book
+
+    book, book_created, content_created = seed_example_book()
+
+    if book_created and content_created:
+        print(f"Created example book: {book.title}")
+    elif content_created:
+        print(f"Added text to existing book: {book.title}")
+    else:
+        print(f"Example book exists, seed not finished.")
+
