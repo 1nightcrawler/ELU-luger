@@ -7,6 +7,9 @@ __pycache__/
 *.db
 *.sqlite
 
+#npm
+node_modules
+
 # Generated
 app/static/audio/tts/
 recordings/

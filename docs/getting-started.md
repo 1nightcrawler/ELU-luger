@@ -7,6 +7,7 @@ This guide sets up the Flask prototype for local development. Commands assume th
 - Git
 - Python 3.11 (the current development environment uses Python 3.11.5)
 - PowerShell on Windows, or a POSIX-compatible shell on macOS/Linux
+- Node.js and npm for building frontend assets (Tailwind CSS and Lucide icons)
 
 Use a virtual environment so project packages do not change your system Python.
 
@@ -75,6 +76,34 @@ flask run
 The installed `python-dotenv` package lets Flask CLI load `.flaskenv` automatically. That file points Flask to `run.py`, enables debug mode, and selects the development configuration, so you do not need to pass `--app` or `--debug` manually. Open <http://127.0.0.1:5000/> in your browser. The current application is an early prototype; the active route renders the landing page, while much of the database model describes functionality that does not yet have complete application routes or workflows.
 
 Stop the development server with `Ctrl+C`.
+
+## Adding icons
+
+The project uses Lucide icons in its Jinja templates. Icon names used in templates must be registered in [`frontend/main.js`](../frontend/main.js), which imports the required icons and calls `createIcons`. For example, import `Book` to use `data-lucide="book"`, or `ChartColumn` to use `data-lucide="chart-column"`. Add every icon used by a template to the `icons` object passed to `createIcons`.
+
+Install the JavaScript dependencies from the repository root if they are not installed yet:
+
+```shell
+npm install
+```
+
+After changing the imports or registered icons, build the browser bundle:
+
+```shell
+npx vite build
+```
+
+The Vite configuration writes the bundle to `app/static/dist/app.js`; [`base.html`](../app/templates/base.html) loads it for the templates. Refresh the page after rebuilding. If an icon remains empty, check that the `data-lucide` name matches an icon registered in `frontend/main.js`.
+
+## Build Tailwind CSS
+
+From the repository root, run the Tailwind watcher:
+
+```shell
+npm run tailwind-build
+```
+
+The script in [`package.json`](../package.json) watches the templates and CSS sources configured in [`tailwind.config.js`](../tailwind.config.js), and writes the generated stylesheet to `app/static/dist/tailwind.css`. Keep this command running during development so changes to Tailwind classes are included in the CSS. The base template loads that generated stylesheet.
 
 ## Run the tests
 

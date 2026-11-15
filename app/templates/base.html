@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-blue-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='output-style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='dist/tailwind.css') }}">
+    <script type="module" src="{{ url_for('static', filename='dist/app.js') }}"></script>
     <title>Valt-e</title>
 </head>
-<body>
+<body class="flex flex-col min-h-dvh">
     <header>
         {% block header %} {% endblock %}
     </header>
-    <main>
-        <div id="content">
+    <main class="flex-1">
+        <div id="content" class="p-5 ">
             {% block content %} {% endblock %}
         </div>
     </main>

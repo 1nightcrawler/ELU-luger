@@ -1,0 +1,17 @@
+{
+  "name": "ELU-luger",
+  "version": "1.0.0",
+  "description": "Application for a device supporting functional reading",
+  "main": "index.js",
+  "scripts": {
+    "tailwind-build": "npx tailwindcss -i ./app/static/css/style.css -o ./app/static/dist/tailwind.css --watch --config ./tailwind.config.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.5",
+    "lucide": "^1.73.0",
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.8"
+  }
+}
