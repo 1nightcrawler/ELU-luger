@@ -2,6 +2,26 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
+    # After personalized questions, you get this many books recommended 
+    BOOK_MAP_STARTER_CHOICES = 4
+
+    # First book params: after finishing a book it can reveal MIN to MAX branches.
+    BOOK_MAP_ROOT_CHILDREN_MIN = 4
+    BOOK_MAP_ROOT_CHILDREN_MAX = 6
+
+    # after first book
+    BOOK_MAP_FOLLOWUP_CHILDREN_MIN = 1
+    BOOK_MAP_FOLLOWUP_CHILDREN_MAX = 4
+
+    # Recommendation tuning param; to adjust using observed results.
+    USER_RECOMMENDATION_EXPLORATION_RATE = 0.20
+    
+    # Default value for classroom assignment pass threshold
+    STUDENT_PASS_PERCENT_DEFAULT = 70.0
+
+    # Auto publish difficulties on algorithm finish; by default suggests.
+    BOOK_DIFFICULTY_AUTO_PUBLISH = False
+
 
     @staticmethod
     def init_app(app):
