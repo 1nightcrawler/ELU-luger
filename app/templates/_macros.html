@@ -1,12 +1,122 @@
-{% macro footer_navigation_bar(role="USER", selected) %}
-{% if role != "TEACHER" | role != "ADMIN" %}
-<div>
-    <a href="/">Raamatud</a>
-    <a href="/statistics">Statistika</a>
-    {% if role == "USER" %}
-        <a href="/leaderboard">Edetabel</a>
+{% macro footer_navigation(role="USER", type="default") %}
+    {% if role not in ("TEACHER", "ADMIN") and type == "default" %}
+        <nav id="footer-navbar" class="flex gap-3 justify-around bg-white p-4">
+            <a
+                href="{{ url_for('main.index') }}" 
+                id="footer-navbar-books"
+            >
+                <img 
+                    src="{{ url_for('static', filename='icons/book.svg') }}" 
+                    aria-hidden="true" 
+                    class="size-7"
+                >
+            </a>
+            <a
+                href="{{ url_for('main.statistics') }}"
+                id="footer-navbar-statistics"
+            >
+                <img 
+                    src="{{ url_for('static', filename='icons/chart-column.svg') }}" 
+                    aria-hidden="true" 
+                    class="size-7"
+                >
+            </a>
+            {% if role == "USER" %}
+                <a
+                    href="{{ url_for('main.leaderboard') }}" 
+                    id="footer-navbar-leaderboard"
+                >
+                    <img
+                        src="{{ url_for('static', filename='icons/trophy.svg') }}"
+                        aria-hidden="true" 
+                        class="size-7"
+                    >
+                </a>
+            {% endif %}
+            <a
+                href="{{ url_for('main.settings') }}"
+                id="footer-navbar-settings"
+            >
+                <img
+                    src="{{ url_for('static', filename='icons/settings.svg') }}"
+                    aria-hidden="true" 
+                    class="size-7"
+                >
+            </a>
+        </nav>
     {% endif %}
-    <a href="/settings">Seaded</a>
-</div>
-{% endif %}
+{% endmacro %}
+
+{% macro header_navigation(role="USER", type="default", book_id=None) %}
+    <div class="flex w-full items-center gap-4 p-2 px-4 bg-white border-2 border-transparent rounded-2xl">
+        {% if type == "default" %}
+        <div>
+            <img 
+                src="{{ url_for('static', filename='assets/placeholder_512px.jpg') }}"
+                alt="Profile"
+                width="64px"
+                class="border-transparent rounded-full"
+            >
+        </div>
+        <div id="user-info" class="flex flex-col items-center align-middle">
+            <div>
+                <span>Juku</span>
+                <span>Roll</span>
+            </div>
+            <span>Grupp</span>
+        </div>
+        <div class="grow"></div>
+        <div id="points" class="flex items-center align-middle gap-1">
+            <img
+                src="{{ url_for('static', filename='icons/sparkles.svg') }}"
+                aria-hidden="true" class="size-6"
+            >
+            <span>0</span>
+        </div>
+        <button
+            type="button"
+        >
+            <img
+                src="{{ url_for('static', filename='icons/log-out.svg') }}"
+                aria-hidden="true" 
+                class="size-6"
+            >
+        </button>             
+        {% endif %}
+        {% if type == "book" %}
+        <div class="flex w-full gap-5 items-center justify-center">
+            <a href="{{ url_for('main.book_info', book_id=book_id) }}">
+                <i data-lucide="arrow-left" class="size-7" aria-hidden="true"></i>
+            </a>
+            <div class="flex flex-col">
+                <span>Kevade</span>
+                <span>Oskar Luts</span>
+            </div>
+            <div class="grow"></div>
+            <div class="flex flex-row gap-3">
+                <button>
+                    <img
+                        src="{{ url_for('static', filename='icons/search.svg') }}" 
+                        aria-hidden="true" 
+                        class="size-6"
+                    >
+                </button>
+                <button>
+                    <img
+                        src="{{ url_for('static', filename='icons/pen-line.svg') }}"
+                        aria-hidden="true" 
+                        class="size-6"
+                    >
+                </button>
+                <button>
+                    <img
+                        src="{{ url_for('static', filename='icons/sliders-horizontal.svg') }}"
+                        aria-hidden="true" 
+                        class="size-6"
+                    >
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 {% endmacro %}

@@ -4,6 +4,7 @@
   "description": "Application for a device supporting functional reading",
   "main": "index.js",
   "scripts": {
+    "build:icons": "node scripts/build-icons.mjs",
     "tailwind-build": "npx tailwindcss -i ./app/static/css/style.css -o ./app/static/dist/tailwind.css --watch --config ./tailwind.config.js"
   },
   "author": "",

@@ -1,14 +1,18 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
 {% block header %}
+    {{ macros.header_navigation(type="default") }}
 {% endblock %}
 {% block content %}
-<div id="books-wrapper">
-    <div id="books-content">
-        Siia ilmuvad raamatud
+<div id="books-wrapper" class="flex flex-col align-middle">
+    <h1 class="self-center font-bold text-3xl">Raamatud</h1>
+    <div id="books-content" class="p-3">
+        {% include '_books.html' %}
     </div>
 </div>
 {% endblock %}
 {% block footer %}
+    {{ macros.footer_navigation() }}
 {% endblock %}
 {% block scripts %}
 {% endblock %}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-blue-50">
+<html lang="et" class="bg-blue-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,14 +9,16 @@
 </head>
 <body class="flex flex-col min-h-dvh">
     <header>
-        {% block header %} {% endblock %}
+        <div id="header" class="fixed top-0 left-0 right-0 overflow-hidden m-2">
+            {% block header %} {% endblock %}
+        </div>
     </header>
-    <main class="flex-1">
-        <div id="content" class="p-5 ">
+    <main class="flex-1 overflow-y-auto pt-17 pb-8">
+        <div id="content" class="p-5">
             {% block content %} {% endblock %}
         </div>
     </main>
-    <footer>
+    <footer class="sticky bottom-0 left-0 right-0 overflow-hidden">
         <div id="navigation">
             {% block footer %} {% endblock %}
         </div>

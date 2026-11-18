@@ -1,3 +1,8 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+{% block header %}
+    {{ macros.header_navigation(type="book", book_id=book_id) }}
+{% endblock %}
 {% block content %}
 <div id="book-content-wrapper">
     <div id="book-content">
@@ -5,8 +10,9 @@
     </div>
 </div>
 {% endblock %}
-{% block }
-
+{% block footer %}
+    {{ macros.footer_navigation()  }}
+{% endblock %}
 {% block scripts %}
 <script>
     const bookText = document.querySelector("#book-content");
