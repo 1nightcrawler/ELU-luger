@@ -47,6 +47,16 @@ class QuestionResponseStatus(Enum):
     SKIPPED = "SKIPPED"
     NEEDS_REVIEW = "NEEDS_REVIEW"
 
+class BookProgressStatus(Enum):
+    STARTER_CHOICE = "STARTER_CHOICE"
+    HIDDEN = "HIDDEN"
+    AVAILABLE = "AVAILABLE"
+    IN_PROGRESS = "IN_PROGRESS"
+    AWAITING_TEST = "AWAITING_TEST"
+    RETAKE_REQUIRED = "RETAKE_REQUIRED"
+    COMPLETED = "COMPLETED"
+    DISMISSED = "DISMISSED"
+
 question_response_options = db.Table("question_response_options",
     db.Column("response_id", db.Integer, db.ForeignKey("question_responses.id", ondelete="CASCADE"), primary_key=True),
     db.Column("option_id", db.Integer, db.ForeignKey("question_options.id", ondelete="RESTRICT"), primary_key=True)
@@ -144,6 +154,17 @@ class BookProgress(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey("students.id", ondelete="CASCADE"), nullable=True)
     current_page = db.Column(db.Integer, nullable=False, default=0)
 
+    status = db.Column(db.Enum(BookProgressStatus), nullable=False, default=BookProgressStatus.AVAILABLE)
+    parent_progress_id = db.Column(db.Integer, db.ForeignKey("book_progress.id", ondelete="CASCADE", name="fk_book_progress_parent_progress_id"), nullable=True)
+    recommendation_score = db.Column(db.Float, nullable=True)
+    recommendation_reason = db.Column(db.String(200), nullable=True)
+
+    completed_at = db.Column(db.DateTime, nullable=True)
+    revealed_at = db.Column(db.DateTime, nullable=True)
+
+    parent = db.relationship("BookProgress", remote_side=[id], back_populates="children")
+    children = db.relationship("BookProgress", back_populates="parent")
+
     book = db.relationship("Book")
     user = db.relationship("User", back_populates="book_progress")
     student = db.relationship("Student", back_populates="book_progress")
@@ -166,7 +187,27 @@ class BookTestSet(db.Model):
     book = db.relationship("Book", back_populates="test_sets")
     creator = db.relationship("User", back_populates="created_test_sets")
     tests = db.relationship("BookTest", back_populates="test_set", cascade="all, delete-orphan", passive_deletes=True, order_by="BookTest.position")
-    
+
+class BookTestSetAttempt(db.Model):
+    __tablename__ = "book_test_set_attempts"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "classroom_assignment_id",
+            "student_id",
+            "attempt_number",
+            name="uq_set_attempt_student_number",
+        ),
+    )
+    id = db.Column(db.Integer, primary_key=True)
+    classroom_assignment_id = db.Column(db.Integer, db.ForeignKey("classroom_book_assignments.id", ondelete="CASCADE"), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey("students.id", ondelete="CASCADE"), nullable=False)
+    attempt_number = db.Column(db.Integer, nullable=False)
+    total_awarded = db.Column(db.Float, nullable=False, default=0)
+    total_possible = db.Column(db.Float, nullable=False, default=0)
+    passed = db.Column(db.Boolean, nullable=True)
+    completed_at = db.Column(db.DateTime, nullable=True)
+
+    test_attempts = db.relationship("TestAttempt", back_populates="book_test_set_attempt", cascade="all, delete-orphan")
 class BookTest(db.Model):
     __tablename__ = 'book_tests'
     __table_args__ = (
@@ -190,11 +231,14 @@ class BookTestQuestion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     book_test_id = db.Column(db.Integer, db.ForeignKey("book_tests.id", ondelete="CASCADE"), nullable=False)
     position = db.Column(db.Integer, nullable=False, default = 0)
+
     first_question_type = db.Column(db.Enum(QuestionTypes), nullable=False, default=QuestionTypes.DEFAULT)
     soundbite_audio_url = db.Column(db.String(150), nullable=True)
     main_question = db.Column(db.String(100), nullable=False)
     secondary_question = db.Column(db.String(100), nullable=True) ##only can be used if soundbite is also used and provides additional info
     question_answer_type = db.Column(db.Enum(AnswerTypes), nullable = False)
+
+    points_possible = db.Column(db.Float, nullable=False, default=1.0)
 
     options = db.relationship("QuestionOption", back_populates="question", cascade="all, delete-orphan", order_by="QuestionOption.position")
     book_test = db.relationship("BookTest", back_populates="questions")
@@ -229,6 +273,7 @@ class TestAttempt(db.Model):
     classroom_assignment_id = db.Column(db.Integer, db.ForeignKey("classroom_book_assignments.id", ondelete="SET NULL"), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="RESTRICT"), nullable=True)
     student_id = db.Column(db.Integer, db.ForeignKey("students.id", ondelete="RESTRICT"), nullable=True)
+    book_test_set_attempt_id = db.Column(db.Integer, db.ForeignKey("book_test_set_attempts.id", ondelete="CASCADE", name="fk_test_attempts_book_test_set_attempt_id"), nullable=True)
 
     status = db.Column(db.Enum(TestAttemptStatus), nullable=False, default=TestAttemptStatus.IN_PROGRESS)
 
@@ -239,6 +284,7 @@ class TestAttempt(db.Model):
     user = db.relationship("User", back_populates="test_attempts")
     student = db.relationship("Student", back_populates="test_attempts")
     responses = db.relationship("QuestionResponse", back_populates="attempt", cascade="all, delete-orphan", order_by="QuestionResponse.question_id")
+    book_test_set_attempt = db.relationship("BookTestSetAttempt", back_populates="test_attempts")
 
 class QuestionResponse(db.Model):
     __tablename__ = "question_responses"
@@ -280,6 +326,8 @@ class ClassroomBookAssignment(db.Model):
     test_set_id = db.Column(db.Integer, db.ForeignKey("book_test_sets.id", ondelete="RESTRICT"), nullable=False)
     assigned_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
+
+    unlock_threshold_percent = db.Column(db.Float, nullable=True)
 
     classroom = db.relationship("Classroom", back_populates="book_assignments")
     test_set = db.relationship("BookTestSet")
