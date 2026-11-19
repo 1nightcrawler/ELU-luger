@@ -62,6 +62,11 @@ question_response_options = db.Table("question_response_options",
     db.Column("option_id", db.Integer, db.ForeignKey("question_options.id", ondelete="RESTRICT"), primary_key=True)
 )
 
+book_category_links = db.Table("book_category_links",
+    db.Column("book_id", db.Integer, db.ForeignKey("books.id", ondelete="CASCADE"), primary_key=True),
+    db.Column("category_id", db.Integer, db.ForeignKey("book_categories.id", ondelete="CASCADE"), primary_key=True),
+)
+
 ##Many to many intermediary tables
 class ClassroomEducator(db.Model):
     __tablename__ = "classroom_educators"
@@ -84,6 +89,7 @@ class User(db.Model):
     educator = db.relationship("Educator", uselist=False, cascade="all, delete-orphan", passive_deletes = True, back_populates="user")
     created_test_sets = db.relationship("BookTestSet", back_populates="creator")
     test_attempts = db.relationship("TestAttempt", back_populates="user")
+    category_preferences = db.relationship("UserCategoryPreference", back_populates="user", cascade="all, delete-orphan")
 
 class Student(db.Model):
     __tablename__ = 'students'
@@ -134,8 +140,39 @@ class Book(db.Model):
     year = db.Column(db.Integer)
     pages = db.Column(db.Integer)
     is_available = db.Column(db.Boolean, default=True)
+    difficulty = db.Column(db.Enum(BookDifficulties), nullable=True)
+    difficulty_suggestion = db.Column(db.Enum(BookDifficulties), nullable=True)
+
+    categories = db.relationship("BookCategory", secondary=book_category_links, back_populates="books")
     content = db.relationship("BookContent", uselist=False, back_populates="book", cascade="all, delete-orphan", passive_deletes=True) ## content is stored separately from book info
     test_sets = db.relationship("BookTestSet", back_populates="book", passive_deletes="all") ## books have test sets -> test sets have tests in them
+
+class BookCategory(db.Model):
+    __tablename__ = "book_categories"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
+
+    books = db.relationship("Book", secondary=book_category_links, back_populates="categories")
+    user_preferences = db.relationship("UserCategoryPreference", back_populates="category", cascade="all, delete-orphan")
+
+class UserCategoryPreference(db.Model):
+    __tablename__ = "user_category_preferences"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "user_id",
+            "category_id",
+            name = "uq_user_category_preference"
+        ),
+        db.CheckConstraint("weight > 0", name = "ck_category_preference_weight_positive"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey("book_categories.id", ondelete="CASCADE"), nullable=False)
+    weight = db.Column(db.Float, nullable=False, default=1.0)
+
+    user = db.relationship("User", back_populates="category_preferences")
+    category = db.relationship("BookCategory", back_populates="user_preferences")
 
 class BookProgress(db.Model):
     __tablename__ = 'book_progress'
@@ -155,6 +192,7 @@ class BookProgress(db.Model):
     current_page = db.Column(db.Integer, nullable=False, default=0)
 
     status = db.Column(db.Enum(BookProgressStatus), nullable=False, default=BookProgressStatus.AVAILABLE)
+    #Parent_progress links a learner’s book-progress row to the progress row for the book that led to it. It’s a self-reference within BookProgress, not a link between books in the catalog.
     parent_progress_id = db.Column(db.Integer, db.ForeignKey("book_progress.id", ondelete="CASCADE", name="fk_book_progress_parent_progress_id"), nullable=True)
     recommendation_score = db.Column(db.Float, nullable=True)
     recommendation_reason = db.Column(db.String(200), nullable=True)
