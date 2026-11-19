@@ -135,6 +135,30 @@ flask db init
 
 If a migration or upgrade fails, stop and inspect the error and generated revision before trying another migration. Do not delete the local SQLite database as a generic fix; that destroys its data.
 
+## Working with branches
+
+Switching Git branches changes the checked-out code and migration files, but it does **not** change the local database. By default, branches use the same `data-dev.sqlite` development database (unless `DEV_DATABASE_URL` is set).
+
+Before switching, save or stash your code changes. If you applied migrations that are not present on the branch you are switching to, downgrade the database while still on the branch that contains those migration files:
+
+```shell
+flask db current
+flask db history
+flask db downgrade <shared-revision>
+```
+
+Replace `<shared-revision>` with the latest migration revision that exists on both branches (the common point in their migration history). Back up any data you need first: a downgrade runs the migration's `downgrade()` function and may drop tables or data.
+
+Then switch branches and apply that branch's migrations:
+
+```shell
+git switch <target-branch>
+flask db upgrade
+flask db current
+```
+
+If you already switched away, return to the branch containing the applied migrations, downgrade to the shared revision, then switch back. Do not use `flask db stamp` as a substitute for downgrading: it changes Alembic's recorded revision without changing the database schema. If you frequently move between branches with different schemas, use a separate development database for each branch by setting `DEV_DATABASE_URL` accordingly.
+
 ## Project layout
 
 ```text
