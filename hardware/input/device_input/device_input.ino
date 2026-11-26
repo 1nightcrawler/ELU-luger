@@ -16,11 +16,18 @@ ButtonKey buttons[] = {
   {6, KEY_RETURN,      Button()},  // Encoder press
 };
 
+const uint8_t PIN_ENC_A = 7;
+const uint8_t PIN_ENC_B = 8;
+Encoder encoder;
+
 void setup() {
   for (ButtonKey& b : buttons) {
     pinMode(b.pin, INPUT_PULLUP);
   }
+  pinMode(PIN_ENC_A, INPUT_PULLUP);
+  pinMode(PIN_ENC_B, INPUT_PULLUP);
   Keyboard.begin();
+  
 }
 
 void loop() {
@@ -32,4 +39,8 @@ void loop() {
       Keyboard.write(b.key);
     }
   }
+  int8_t click = encoder.update(digitalRead(PIN_ENC_A) == HIGH,
+                                digitalRead(PIN_ENC_B) == HIGH);
+  if (click > 0) Keyboard.write(KEY_UP_ARROW);
+  if (click < 0) Keyboard.write(KEY_DOWN_ARROW);
 }
