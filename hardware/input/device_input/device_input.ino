@@ -1,15 +1,35 @@
 #include <Keyboard.h>
+#include "input_logic.h"
 
-const int PIN_NEXT = 2;
+// Pins and keys: keep in sync with hardware/keymap.md
+struct ButtonKey {
+  uint8_t pin;
+  uint8_t key;
+  Button button;
+};
+
+ButtonKey buttons[] = {
+  {2, KEY_RIGHT_ARROW, Button()},  // Next
+  {3, KEY_LEFT_ARROW,  Button()},  // Back
+  {4, KEY_PAGE_UP,     Button()},  // Button 3 (aux1)
+  {5, KEY_PAGE_DOWN,   Button()},  // Button 4 (aux2)
+  {6, KEY_RETURN,      Button()},  // Encoder press
+};
 
 void setup() {
-  pinMode(PIN_NEXT, INPUT_PULLUP);  // pin reads HIGH; pressing the button pulls it to GND (LOW)
+  for (ButtonKey& b : buttons) {
+    pinMode(b.pin, INPUT_PULLUP);
+  }
   Keyboard.begin();
 }
 
 void loop() {
-  if (digitalRead(PIN_NEXT) == LOW) {
-    Keyboard.write(KEY_RIGHT_ARROW);
-    delay(300);                      // crude: stops one press from typing many arrows
+  uint32_t now = millis();
+
+  for (ButtonKey& b : buttons) {
+    bool pinHigh = digitalRead(b.pin) == HIGH;
+    if (b.button.update(pinHigh, now) == Button::PRESSED) {
+      Keyboard.write(b.key);
+    }
   }
 }
