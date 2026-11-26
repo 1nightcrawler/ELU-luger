@@ -32,3 +32,23 @@ out differently if the Pi uses the Estonian layout.
 
 A laptop keyboard sends the same keys, so the app can be developed and
 tested without the hardware. On a Mac, Page Up/Down is `fn + ↑` / `fn + ↓`.
+
+## Using the actions in a page
+
+Listen for the action, not the key. Call `preventDefault()` when the page
+handled it; the key's normal browser behaviour (e.g. arrows scrolling the
+page) is then cancelled too. Actions no page handles keep the normal
+behaviour.
+
+    document.addEventListener("device:next", (event) => {
+        showNextParagraph();
+        event.preventDefault();
+    });
+
+- `press`, `aux1` and `aux2` fire once per press; holding the key does not
+  repeat them. `next`, `prev`, `up` and `down` repeat while held.
+- While a text field has focus (e.g. PIN entry), no actions fire; keys work
+  in the field as usual.
+- Key combinations with Ctrl, Alt, Shift or Cmd are ignored.
+
+The mapping is in `app/static/js/device-keys.js`.
