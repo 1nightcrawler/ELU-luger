@@ -10,11 +10,31 @@
     ArrowDown: "down",
   };
 
-  document.addEventListener("keydown", (event) => {
-    const action = KEYMAP[event.key];
-    if (!action) return;            // not one of our keys: ignore it
+  // (3) Actions that must fire only once per press, even if the key is held.
+  const NO_REPEAT = new Set(["press", "aux1", "aux2"]);
 
-    console.log("device:" + action);
-    document.dispatchEvent(new CustomEvent("device:" + action));
+  // (1) Is the user typing into something right now?
+  function isTyping(element) {
+    if (!element) return false;
+    if (element.isContentEditable) return true;
+    const tag = element.tagName;
+    if (tag === "TEXTAREA" || tag === "SELECT") return true;
+    if (tag !== "INPUT") return false;
+    const notText = ["button", "checkbox", "radio", "submit", "reset", "range"];
+    return !notText.includes(element.type);
+  }
+
+  document.addEventListener("keydown", (event) => {
+    // Ctrl/Alt/Shift/Cmd combos are shortcuts, not device presses.
+    if (event.ctrlKey || event.altKey || event.shiftKey || event.metaKey) return;
+
+    const action = KEYMAP[event.key];
+    if (!action) return;
+    if (event.repeat && NO_REPEAT.has(action)) return;   // (3)
+    if (isTyping(event.target)) return;                  // (1)
+
+    const deviceEvent = new CustomEvent("device:" + action, { cancelable: true });
+    const handled = !document.dispatchEvent(deviceEvent);
+    if (handled) event.preventDefault();                 // (2)
   });
 })();
